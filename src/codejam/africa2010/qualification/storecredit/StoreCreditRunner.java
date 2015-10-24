@@ -16,13 +16,14 @@ public class StoreCreditRunner {
 		BufferedWriter writer = new BufferedWriter(new OutputStreamWriter(System.out));
 		
 		int nTestCases = readIntLine(rdr).get(0);
-		
 		for(int testNum = 0; testNum < nTestCases; testNum++) {
 			int credit = readIntLine(rdr).get(0);
 			int nItems = readIntLine(rdr).get(0);
 			List<Integer> prices = readIntLine(rdr);
 			
 			List<Integer> solution = getItemIndicesWithTotal(prices, credit);
+			assert(solution.size() == 2);
+			assert(solution.get(0) < solution.get(1));
 			
 			writer.write(String.format("Case #%d: %d %d\n", testNum, solution.get(0), solution.get(1)));
 			writer.flush();
