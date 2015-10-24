@@ -6,7 +6,12 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Set;
+
+import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.Collections;
 
 public class StoreCreditRunner {
 
@@ -34,8 +39,46 @@ public class StoreCreditRunner {
 	private static List<Integer> getItemIndicesWithTotal(List<Integer> prices, int credit) {
 		// TODO Auto-generated method stub
 		List<Integer> result = new ArrayList<Integer>();
-		result.add(2);
-		result.add(5);
+		List<ItemValue> priceByItem = new ArrayList<ItemValue>();
+		
+		for(int i = 0; i < prices.size(); i++) {
+			priceByItem.add(new ItemValue(i + 1, prices.get(i)));
+		}
+		
+		Collection<ItemValue> remainingCreditByItem = getRemainingCreditByItem(credit, priceByItem);
+		
+		Collection<TaggedItemContainer<ItemTag, ItemValue>> taggedItemPrices = TaggedItemContainer.tagItems(priceByItem, ItemTag.ITEM_PRICE);
+		Collection<TaggedItemContainer<ItemTag, ItemValue>> taggedRemainingCredits = TaggedItemContainer.tagItems(priceByItem, ItemTag.REMAINING_CREDIT);
+		
+		List<TaggedItemContainer<ItemTag, ItemValue>> allTaggedItems = new ArrayList<TaggedItemContainer<ItemTag, ItemValue>>();
+		allTaggedItems.addAll(taggedItemPrices);
+		allTaggedItems.addAll(taggedRemainingCredits);
+		
+		java.util.Collections.sort(allTaggedItems, new Comparator<TaggedItemContainer<ItemTag, ItemValue>>() {
+
+			@Override
+			public int compare(TaggedItemContainer<ItemTag, ItemValue> o1, TaggedItemContainer<ItemTag, ItemValue> o2) {
+				return o1.getItem().getValue() - o2.getItem().getValue();
+			}
+			
+		});
+		
+		// TODO: Hash match
+		
+		return result;
+	}
+	
+	private enum ItemTag {
+		ITEM_PRICE, REMAINING_CREDIT
+	}
+	
+
+	private static Collection<ItemValue> getRemainingCreditByItem(int totalCredit, Collection<ItemValue> priceByItem) {
+		List<ItemValue> result = new ArrayList<ItemValue>();
+		for(ItemValue itemPrice : priceByItem) {
+			result.add(new ItemValue(itemPrice.getItemID(), totalCredit - itemPrice.getValue()));
+		}
+		
 		return result;
 	}
 
